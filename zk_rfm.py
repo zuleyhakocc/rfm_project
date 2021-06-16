@@ -19,57 +19,51 @@ df_ = pd.read_excel(r"C:\Users\zuley\Desktop\hafta3_python/online_retail_II.xlsx
                     sheet_name="Year 2010-2011")
 
 
-#GÖREV1: Online Retail II excelindeki 2010-2011 verisini okuyunuz. Oluşturduğunuz dataframe’in kopyasını oluşturunuz
+# Online Retail II excelindeki 2010-2011 verisini okuyunuz. Oluşturduğunuz dataframe’in kopyasını oluşturunuz
 df_ = pd.read_excel(r"C:\Users\zuley\Desktop\hafta3_python/online_retail_II.xlsx",
                     sheet_name="Year 2010-2011")
 df = df_.copy()
 df.head()
 df.shape
 
-#GÖREV2: Veri setinin betimsel istatistiklerini inceleyiniz
+# Veri setinin betimsel istatistiklerini inceleyiniz
 df.shape
 df.dtypes
 df.describe().T   # - değerler var bunlar iadeler bunları çıkarmalıyız
 
-#GÖREV3:Veri setinde eksik gözlem var mı? Varsa hangi değişkende kaç tane eksik gözlem vardır?
+#Veri setinde eksik gözlem var mı? Varsa hangi değişkende kaç tane eksik gözlem vardır?
 
 df.shape
 df.isnull()    #True false döner
 df.isnull().sum()   #description ve customer ıd de eksiklikler mevcut
-#GÖREV4: Eksik gözlemleri veri setinden çıkartınız. Çıkarma işleminde ‘inplace=True’ parametresini kullanınız.
+# Eksik gözlemleri veri setinden çıkartınız. Çıkarma işleminde ‘inplace=True’ parametresini kullanınız.
 df.dropna(inplace=True)    # eksik gözlemler kalıcı olarak silindi
 df.shape
 
-#GÖREV5: Eşsiz ürün sayısı kaçtır?
+# Eşsiz ürün sayısı kaçtır?
 df["StockCode"].nunique()
-#GÖREV6: Hangi üründen kaçar tane vardır?
+# Hangi üründen kaçar tane vardır?
 
 df("StockCode").value_counts()
 
 
-#GÖREV7: En çok sipariş edilen 5 ürünü çoktan aza doğru sıralayınız.
+# En çok sipariş edilen 5 ürünü çoktan aza doğru sıralayınız.
 
 df.groupby("Description")["Quantity"].sum().sort_values(ascending=False).head()
 
-#GÖREV8: Faturalardaki ‘C’ iptal edilen işlemleri göstermektedir. İptal edilen işlemleri veri setinden çıkartınız.
+#Faturalardaki ‘C’ iptal edilen işlemleri göstermektedir. İptal edilen işlemleri veri setinden çıkartınız.
 df = df[~df["Invoice"].str.contains("C", na=False)]
 ###################df[df["Quantity"]>0].head()
 pd.set_option('display.max_columns', 10)
 pd.set_option('display.max_rows', 10)
 
-#GÖREV9: Fatura başına elde edilen toplam kazancı ifade eden ‘TotalPrice’ adında bir değişken oluşturunuz
+ #Fatura başına elde edilen toplam kazancı ifade eden ‘TotalPrice’ adında bir değişken oluşturunuz
 df["TotalPrice"] = df["Quantity"] * df["Price"] # ürün adedi*birim fiyatı =toplam ücret
 
 
 
 
-#Görev 2:
-#RFM metriklerinin hesaplanması
-#Recency, Frequency ve Monetary tanımlarını yapınız.
 
-#Müşteri özelinde Recency, Frequency ve Monetary metriklerini groupby, agg ve lambda ile hesaplayınız
-# Hesapladığınız metrikleri rfm isimli bir değişkene atayınız.
-# Oluşturduğunuz metriklerin isimlerini recency, frequency ve monetary olarak değiştiriniz
 
 df["InvoiceDate"].max()
 
@@ -91,16 +85,6 @@ rfm.describe().T
 rfm = rfm[rfm["monetary"] > 0]
 
 
-
-
-#Görev 3:
-#RFM skorlarının oluşturulması ve tek bir değişkene çevrilmesi
-#Recency, Frequency ve Monetary metriklerini qcut yardımı ile 1-5 arasında skorlara çeviriniz.
-#Bu skorları recency_score, frequency_score ve monetary_score olarak kaydediniz.
-#recency_score ve frequency_score’u tek bir değişken olarak ifade ediniz ve RFM_SCORE olarak kaydediniz.
-#RFM skorlarının oluşturulması ve tek bir değişkene çevrilmesi
-#DİKKAT! monetary_score’u dahil etmiyoruz
-
 # Recency skoru
 rfm["recency_score"] = pd.qcut(rfm['recency'], 5, labels=[5, 4, 3, 2, 1])  # hepsi için anlaşılır olsun diye skorluyoruz büyükten küçüğe doğru sırala 5 skoru küçük değere karşılık gelsin
 # 0,20,40,60,80,100
@@ -114,11 +98,6 @@ rfm["RFM_SCORE"] = (rfm['recency_score'].astype(str) +
                     rfm['frequency_score'].astype(str))   #anlaşılır olması için r+f yapıyoruz
 
 
-
-#Görev 4:
-#RFM skorlarının segment olarak tanımlanması
-#Oluşturulan RFM skorların daha açıklanabilir olması için segment tanımlamaları yapınız
-#Aşağıdaki seg_map yardımı ile skorları segmentlere çeviriniz
 
 
 seg_map = {
@@ -137,15 +116,6 @@ seg_map = {
 
 rfm['segment'] = rfm['RFM_SCORE'].replace(seg_map, regex=True)
 
-
-#Görev 5:
-#Aksiyon zamanı!
-#Önemli bulduğunuz 3 segmenti seçiniz. Bu üç segmenti;
-#- Hem aksiyon kararları açısından,
-#- Hem de segmentlerin yapısı açısından (ortalama RFM değerleri) yorumlayınız.
-# "Loyal Customers" sınıfına ait customer ID'leri seçerek excel çıktısını alınız.
-# Segmentlere göre RFM ortalama ve sıklık değerlerini grupla
-# Need Attention sınıfını göster
 
 rfm[["segment", "recency", "frequency", "monetary"]].groupby("segment").agg(["mean", "count"])
 #need_attion recency ortalaması 52
